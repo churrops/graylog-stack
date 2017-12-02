@@ -1,3 +1,3 @@
-<h3> Projeto Graylog Stack </h3>
+<h1> Projeto Graylog Stack </h1>
 
-Cortesia do Jeferson Fernando da LinuxTips
+Cortesia do arquivo base da Stack: Jeferson Fernando da LinuxTips
