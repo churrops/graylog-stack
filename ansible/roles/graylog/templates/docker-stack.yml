@@ -8,7 +8,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - 8000:80
-    command: gelf://192.168.99.100:12201
+    command: gelf://192.168.99.101:12201
     networks:
       - graylognet
     logging:
@@ -30,13 +30,12 @@ services:
         max-file: "3"
 
   elasticsearch1:
-#    image: elasticsearch:2.4.6
-    image: elasticsearch:6.0
+    image: elasticsearch:2.4.6
     environment:
       - http.host=0.0.0.0
       - cluster.name=graylog
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - xpack.security.enabled=false
     ulimits:
       memlock:
@@ -54,29 +53,6 @@ services:
         max-size: "250m"
         max-file: "3"
 
-#  elasticsearch2:
-#    image: elasticsearch:2.4.6
-#    environment:
-#      - http.host=0.0.0.0
-#      - cluster.name=graylog
-#      - bootstrap.memory_lock=true
-#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-#      - xpack.security.enabled=false
-#      - "discovery.zen.ping.unicast.hosts=elasticsearch
-#    ulimits:
-#      memlock:
-#        soft: -1
-#        hard: -1
-#    volumes:
-#      - es_data2:/usr/share/elasticsearch/data
-#    networks:
-#      - graylognet
-#    logging:
-#      driver: "json-file"
-#      options:
-#        max-size: "250m"
-#        max-file: "3"
-
   graylog:
     image: graylog2/server:2.3.2-2
     volumes:
@@ -89,7 +65,7 @@ services:
 #      GRAYLOG_PASSWORD_SECRET: {{ graylog_password_secret }}
 #      GRAYLOG_ROOT_PASSWORD_SHA2: AQUI O HASH GERADO PELO COMANDO: #echo -n "SUA_SENHA" | shasum -a 256
 #      GRAYLOG_WEB_ENDPOINT_URI: http://{{ipext}}/api/
-      GRAYLOG_WEB_ENDPOINT_URI: http://192.168.99.100:9000/api
+      GRAYLOG_WEB_ENDPOINT_URI: http://graylog:9000/api
       GRAYLOG_ELASTICSEARCH_HOSTS: http://elasticsearch1:9200
       GRAYLOG_PASSWORD_SECRET: ChurrOps1234567890
       GRAYLOG_ROOT_PASSWORD_SHA2: 2e53edcd413feb7d4b3865cdb7eaf2eb9f32b45870836eafb1f154ef730d55a2 
@@ -100,7 +76,7 @@ services:
       GRAYLOG_OUTPUTBUFFER_PROCESSORS: 5
       GRAYLOG_PROCESSOR_WAIT_STRATEGY: blocking
       GRAYLOG_RING_SIZE: 524288
-      GRAYLOG_MESSAGE_JOURNAL_MAX_SIZE: 1gb
+      GRAYLOG_MESSAGE_JOURNAL_MAX_SIZE: 4gb
       GRAYLOG_OUTPUT_BATCH_SIZE: 20000
       GRAYLOG_STREAM_PROCESSING_TIMEOUT: 10000
       GRAYLOG_STREAM_PROCESSING_MAX_FAULTS: 10

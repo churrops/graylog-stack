@@ -1,3 +1,5 @@
 <h1> Projeto Graylog Stack </h1>
 
-Cortesia do arquivo base da Stack: Jeferson Fernando da LinuxTips
+<h2> Projeto base </h2>
+
+https://github.com/vandocouto/graylog2.3.0-1.git
