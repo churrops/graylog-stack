@@ -61,7 +61,7 @@ services:
       - mongo
       - elasticsearch1
     environment:
-      GRAYLOG_WEB_ENDPOINT_URI: http://192.168.99.102:9000/api/
+      GRAYLOG_WEB_ENDPOINT_URI: http://graylog:9000/api
       GRAYLOG_ELASTICSEARCH_HOSTS: http://elasticsearch1:9200
       GRAYLOG_PASSWORD_SECRET: ChurrOps1234567890
       GRAYLOG_ROOT_PASSWORD_SHA2: 2e53edcd413feb7d4b3865cdb7eaf2eb9f32b45870836eafb1f154ef730d55a2 
@@ -103,8 +103,6 @@ volumes:
   mongo_data: 
     driver: local 
   es_data1:
-    driver: local 
-  es_data2:
     driver: local 
   graylog_journal:
     driver: local
