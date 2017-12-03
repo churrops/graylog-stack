@@ -8,7 +8,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - 8000:80
-    command: gelf://192.168.99.101:12201
+    command: gelf://192.168.99.102:12201
     networks:
       - graylognet
     logging:
@@ -30,13 +30,13 @@ services:
         max-file: "3"
 
   elasticsearch1:
-    image: elasticsearch:2.4.6
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.4
     environment:
-      - http.host=0.0.0.0
-      - cluster.name=graylog
-      - bootstrap.memory_lock=true
+      - "http.host=0.0.0.0"
+      - "cluster.name=graylog"
+      - "bootstrap.memory_lock=true"
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-      - xpack.security.enabled=false
+      - "xpack.security.enabled=false"
     ulimits:
       memlock:
         soft: -1
@@ -60,12 +60,8 @@ services:
     depends_on:
       - mongo
       - elasticsearch1
-      - elasticsearch2
     environment:
-#      GRAYLOG_PASSWORD_SECRET: {{ graylog_password_secret }}
-#      GRAYLOG_ROOT_PASSWORD_SHA2: AQUI O HASH GERADO PELO COMANDO: #echo -n "SUA_SENHA" | shasum -a 256
-#      GRAYLOG_WEB_ENDPOINT_URI: http://{{ipext}}/api/
-      GRAYLOG_WEB_ENDPOINT_URI: http://graylog:9000/api
+      GRAYLOG_WEB_ENDPOINT_URI: http://192.168.99.102:9000/api/
       GRAYLOG_ELASTICSEARCH_HOSTS: http://elasticsearch1:9200
       GRAYLOG_PASSWORD_SECRET: ChurrOps1234567890
       GRAYLOG_ROOT_PASSWORD_SHA2: 2e53edcd413feb7d4b3865cdb7eaf2eb9f32b45870836eafb1f154ef730d55a2 
@@ -81,11 +77,17 @@ services:
       GRAYLOG_STREAM_PROCESSING_TIMEOUT: 10000
       GRAYLOG_STREAM_PROCESSING_MAX_FAULTS: 10
     ports:
+      ### Graylog web interface and REST API
       - "9000:9000"
-      - "12204:12204"
-      - "12205:12205"
-      - "12200:12200/udp"
+      ### GELF TCP / UDP
+      - "12201:12201"
       - "12201:12201/udp"
+      ### Syslog TCP/UDP 
+      - "1514:1514"
+      - "1514:1514/udp"
+      - "12900:12900"
+      - "5044:5044"
+      - "5044:5044/udp"
     networks:
       - graylognet
     logging:
