@@ -1,0 +1,132 @@
+version: '3.3'
+
+services:
+
+  logspout:
+    image: micahhausler/logspout:gelf
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 8000:80
+    command: gelf://192.168.99.100:12201
+    networks:
+      - graylognet
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "250m"
+        max-file: "3"
+
+  mongo:
+    image: "mongo:3.6"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - graylognet
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "250m"
+        max-file: "3"
+
+  elasticsearch1:
+#    image: elasticsearch:2.4.6
+    image: elasticsearch:6.0
+    environment:
+      - http.host=0.0.0.0
+      - cluster.name=graylog
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es_data1:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - graylognet
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "250m"
+        max-file: "3"
+
+#  elasticsearch2:
+#    image: elasticsearch:2.4.6
+#    environment:
+#      - http.host=0.0.0.0
+#      - cluster.name=graylog
+#      - bootstrap.memory_lock=true
+#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+#      - xpack.security.enabled=false
+#      - "discovery.zen.ping.unicast.hosts=elasticsearch
+#    ulimits:
+#      memlock:
+#        soft: -1
+#        hard: -1
+#    volumes:
+#      - es_data2:/usr/share/elasticsearch/data
+#    networks:
+#      - graylognet
+#    logging:
+#      driver: "json-file"
+#      options:
+#        max-size: "250m"
+#        max-file: "3"
+
+  graylog:
+    image: graylog2/server:2.3.2-2
+    volumes:
+      - graylog_journal:/usr/share/graylog/data/journal
+    depends_on:
+      - mongo
+      - elasticsearch1
+      - elasticsearch2
+    environment:
+#      GRAYLOG_PASSWORD_SECRET: {{ graylog_password_secret }}
+#      GRAYLOG_ROOT_PASSWORD_SHA2: AQUI O HASH GERADO PELO COMANDO: #echo -n "SUA_SENHA" | shasum -a 256
+#      GRAYLOG_WEB_ENDPOINT_URI: http://{{ipext}}/api/
+      GRAYLOG_WEB_ENDPOINT_URI: http://192.168.99.100:9000/api
+      GRAYLOG_ELASTICSEARCH_HOSTS: http://elasticsearch1:9200
+      GRAYLOG_PASSWORD_SECRET: ChurrOps1234567890
+      GRAYLOG_ROOT_PASSWORD_SHA2: 2e53edcd413feb7d4b3865cdb7eaf2eb9f32b45870836eafb1f154ef730d55a2 
+      GRAYLOG_OUTPUT_FLUSH_INTERVAL: 1
+      GRAYLOG_INPUTBUFFER_RING_SIZE: 4096
+      GRAYLOG_INPUTBUFFER_PROCESSORS: 1
+      GRAYLOG_PROCESSBUFFER_PROCESSORS: 4
+      GRAYLOG_OUTPUTBUFFER_PROCESSORS: 5
+      GRAYLOG_PROCESSOR_WAIT_STRATEGY: blocking
+      GRAYLOG_RING_SIZE: 524288
+      GRAYLOG_MESSAGE_JOURNAL_MAX_SIZE: 1gb
+      GRAYLOG_OUTPUT_BATCH_SIZE: 20000
+      GRAYLOG_STREAM_PROCESSING_TIMEOUT: 10000
+      GRAYLOG_STREAM_PROCESSING_MAX_FAULTS: 10
+    ports:
+      - "9000:9000"
+      - "12204:12204"
+      - "12205:12205"
+      - "12200:12200/udp"
+      - "12201:12201/udp"
+    networks:
+      - graylognet
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "250m"
+        max-file: "3"
+
+networks:
+  graylognet:
+
+volumes:
+  mongo_data: 
+    driver: local 
+  es_data1:
+    driver: local 
+  es_data2:
+    driver: local 
+  graylog_journal:
+    driver: local
