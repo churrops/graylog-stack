@@ -4,6 +4,8 @@ services:
 
   logspout:
     image: micahhausler/logspout:gelf
+    depends_on:
+      - graylog
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
@@ -35,7 +37,7 @@ services:
       - "http.host=0.0.0.0"
       - "cluster.name=graylog"
       - "bootstrap.memory_lock=true"
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
       - "xpack.security.enabled=false"
     ulimits:
       memlock:
@@ -62,6 +64,9 @@ services:
       - elasticsearch1
     environment:
       GRAYLOG_WEB_ENDPOINT_URI: http://graylog:9000/api
+      GRAYLOG_REST_LISTEN_URI: http://0.0.0.0:9000/api/
+      GRAYLOG_REST_TRANSPORT_URI: http://graylog:9000/api/
+      GRAYLOG_WEB_LISTEN_URI: http://0.0.0.0:9000
       GRAYLOG_ELASTICSEARCH_HOSTS: http://elasticsearch1:9200
       GRAYLOG_PASSWORD_SECRET: ChurrOps1234567890
       GRAYLOG_ROOT_PASSWORD_SHA2: 2e53edcd413feb7d4b3865cdb7eaf2eb9f32b45870836eafb1f154ef730d55a2 
